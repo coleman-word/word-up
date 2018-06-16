@@ -29,24 +29,23 @@ When resources are scarce, or for testing purpose, KubeNow enables single-node d
 
 You can achieve this by commenting all of the lines for the other instance types (i.e. edge node, gluster node and worker node) in the config.tfvars file, leaving the master node only as it is shown below:
 
-'''
-# Master configuration (mandatory in general, above all for single-server setup)
+Master configuration (mandatory in general, above all for single-server setup)
 master_flavor = "your-master-flavor"
 master_as_edge = "true"
 
-# Node configuration
-# node_count = "3"
-# node_flavor = "your-node-flavor"
+Node configuration
+node_count = "3"
+node_flavor = "your-node-flavor"
 
-# Edge configuration
-# edge_count = "2"
-# edge_flavor = "your-edge-flavor"
+Edge configuration
+edge_count = "2"
+edge_flavor = "your-edge-flavor"
 
-# Gluster configuration
-# glusternode_count = "1"
-# glusternode_flavor = "your-glusternode-flavor"
-# glusternode_extra_disk_size = "200" # Size in GB
-'''
+Gluster configuration
+glusternode_count = "1"
+glusternode_flavor = "your-glusternode-flavor"
+glusternode_extra_disk_size = "200" # Size in GB
+
 # GlusterFS Nodes
 
 GlusterFS nodes are specialized service nodes. They run only GlusterFS and they are attached to a block storage volume to provide additional capacity. In the default settings, we don’t deploy GlusterFS nodes, as it is not required in many use cases. However, GlusterFS can be particularly convenient when a distributed file system is needed for container synchronization.
