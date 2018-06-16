@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Read config file into variable as as json
+kn_config=$(json2hcl -reverse <config.tfvars)
+
+# Set variables from json-config
+host_cloud=$(jq -r '.provider' <<<"$kn_config")
+image_name=$(jq -r '.boot_image' <<<"$kn_config")
+skip_image_import=$(jq -r '.skip_image_import' <<<"$kn_config")
+
+# Check for recognized cloud provider
+if ! grep -qw "$host_cloud" <<<"openstack gce azure aws"; then
+  echo >&2 "Error: unrecognized host cloud '$host_cloud' in config file config.tfvars"
+  exit 1
+fi
+
+# Import image (AWS doesn't need it)
+if [[ "$skip_image_import" != "true" ]] && [[ "$host_cloud" != 'aws' ]]; then
+  export KN_GCE_ACCOUNT_FILE_PATH="$PWD/service-account.json"
+  export TF_VARS_FILE="$PWD/config.tfvars"
+  export KN_IMAGE_NAME="$image_name"
+  /KubeNow_root/bin/image-create-"$host_cloud".sh
+fi
+
+# Deploy
+terraform init --plugin-dir=/terraform_plugins "/KubeNow_root/$host_cloud"
+
+# shellcheck disable=SC2086
+terraform apply $TERRAFORM_OPT -var-file=config.tfvars "/KubeNow_root/$host_cloud"
+
+# Provision
+/KubeNow_root/bin/kn-provision
